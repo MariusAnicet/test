@@ -1,23 +1,23 @@
 ---
-title: Exemple simple d'héritage
+title: APPLICATION SPORTIVE
 ---
 classDiagram
-    Animal <|-- Chien
-    Animal <|-- Chat
-
-    class Animal {
-        -nom: string
-        -age: int
-        +manger(): void
-        +dormir(): void
+namespace Main {
+    class User{
+        -id_user: int
+        -nom_user: string
+        -email_user: string
+        -mot_de_passe: string
+        +creer_activite(fichier_gpx: File) Activite
+        +consulter_activites() List~Activite~
+        +modifier_activite(activite: Activite) void
+        +supprimer_activite(activite: Activite) void
+        +suivre_user(user: User) void
+        +liker_activite(activite: Activite) void
+        +commenter_activite(activite: Activite, commentaire: string) void
+        +obtenir_statistiques() Statistiques
     }
 
-    class Chien {
-        -race: string
-        +aboyer(): void
-    }
-
-    class Chat {
-        -couleur: string
-        +miauler(): void
-    }
+    class Activite {
+        -id_activite: int
+        -titre: string
