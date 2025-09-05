@@ -8,7 +8,6 @@ title: APPLICATION SPORTIVE
 ---
 classDiagram
 namespace Main {
- Activite <|--  Cyclisme
     class User{
         -id_user: int
         -nom_user: string
