@@ -21,8 +21,7 @@ classDiagram
         +calculer_puissance() float
     }
 
-    %% Héritage
-    Activite <|-- Cyclisme
+   
 
     %% Relation simple
     User "1" --> "*" Activite : crée
