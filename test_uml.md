@@ -1,16 +1,103 @@
+---
+title: APPLICATION SPORTIVE AVEC HÉRITAGE
+---
 classDiagram
-    Animal <|-- Chien
-    Animal <|-- Chat
-
-    class Animal {
-        +manger()
-        +dormir()
+namespace Main {
+    class Utilisateur {
+        -id_user: int
+        -nom_user: string
+        -email_user: string
+        -mot_de_passe: string
+        +creer_activite(fichier_gpx: File) Activite
+        +consulter_activites() List~Activite~
+        +modifier_activite(activite: Activite) void
+        +supprimer_activite(activite: Activite) void
+        +suivre_utilisateur(utilisateur: Utilisateur) void
+        +liker_activite(activite: Activite) void
+        +commenter_activite(activite: Activite, commentaire: string) void
+        +obtenir_statistiques() Statistiques
     }
 
-    class Chien {
-        +aboyer()
+    class UtilisateurPremium {
+        -abonnement: string
+        +obtenirAvantages(): string
     }
 
-    class Chat {
-        +miauler()
+    class Activite {
+        -id: int
+        -titre: string
+        -description: string
+        -date_activite: Date
+        -duree: int
+        -distance: float
+        -sport: Sport
+        -fichier_gpx: string
+        -utilisateur: id_user
+        +modifier() void
+        +supprimer() void
+        +ajouter_like(utilisateur: id_user) void
+        +ajouter_commentaire(commentaire: Commentaire) void
+        +vitesse(fichierGpx) float
     }
+
+    class Sport{
+        <<enumeration>>
+        COURSE_A_PIED
+        CYCLISME
+        NATATION
+        RANDONNEE
+    }
+
+    class Commentaire{
+        -id: int
+        -contenu: string
+        -date_commentaire: Date
+        -utilisateur: id_user
+        -activite: id
+    }
+
+    class Like{
+        -id: int
+        -utilisateur: id_user
+        -activite: id
+        -date_like: Date
+    }
+
+    class FilActualite{
+        -activites: List~Activite~
+        +obtenir_activites_utilisateurs_suivis(utilisateur: Utilisateur) List~Activite~
+        +appliquer_filtres(filtres: Map~string, Object~) List~Activite~
+    }
+
+    class Suivi{
+        -suiveur: id_user
+        -suivi: id_user
+        -date_suivi: Date
+    }
+
+    class Statistiques{
+        -utilisateur: id_user
+        -nombre_activites_semaine: int
+        -nombre_activites_sport: Map~Sport, int~
+        -kilometres_semaine: float
+        -heures_activite_semaine: float
+        +calculer_statistiques(id_user) void
+        +obtenir_statistiques_periode(dateDebut: Date, dateFin: Date) Statistiques
+    }
+}
+
+%% Héritage
+Utilisateur <|-- UtilisateurPremium
+
+%% Relations
+Utilisateur "1" --> "*" Activite : crée
+Utilisateur "1" --> "*" Commentaire : écrit
+Utilisateur "1" --> "*" Like : donne
+Utilisateur "1" --> "*" Suivi : suit/est suivi
+Utilisateur "1" <-- "*" Statistiques : utilise
+Activite "1" --> "1" Sport : appartient à
+Activite "1" <-- "*" Commentaire : reçoit
+Activite "1" <-- "*" Like : reçoit
+FilActualite "*" --> "*" Activite : contient
+Suivi "*" --> "1" Utilisateur : suiveur
+Suivi "*" --> "1" Utilisateur : suivi
