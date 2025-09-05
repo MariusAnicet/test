@@ -3,7 +3,7 @@ title: APPLICATION SPORTIVE
 ---
 classDiagram
 namespace Main {
-    class User{
+    class User {
         -id_user: int
         -nom_user: string
         -email_user: string
@@ -38,10 +38,10 @@ namespace Main {
     class Cyclisme {
         -type_velo: string
         -denivele: float
-        +calculer_puissance(): float
+        +calculer_puissance() float
     }
-         
-    class Sport{
+
+    class Sport {
         <<enumeration>>
         COURSE_A_PIED
         CYCLISME
@@ -49,7 +49,7 @@ namespace Main {
         RANDONNEE
     }
 
-    class Comment{
+    class Comment {
         -id_activite: int
         -contenu: string
         -date_commentaire: Date
@@ -57,26 +57,26 @@ namespace Main {
         -activite: id
     }
 
-    class Like{
+    class Like {
         -id_activite: int
         -user: id_user
         -activite: id
         -date_like: Date
     }
 
-    class FilActualite{
+    class FilActualite {
         -activites: List~Activite~
         +obtenir_activites_users_suivis(user: User) List~Activite~
         +appliquer_filtres(filtres: Map~string, Object~) List~Activite~
     }
 
-    class Suivi{
+    class Suivi {
         -suiveur: id_user
         -suivi: id_user
         -date_suivi: Date
     }
 
-    class Statistiques{
+    class Statistiques {
         -user: id_user
         -nombre_activites_semaine: int
         -nombre_activites_sport: Map~Sport, int~
@@ -88,17 +88,6 @@ namespace Main {
 }
 
 %% Héritage
-Activite <|-- Cyclisme
+Main.Activite <|-- Main.Cyclisme
 
 %% Relations
-User "1" --> "*" Activite : crée
-User "1" --> "*" Comment : écrit
-User "1" --> "*" Like : donne
-User "1" --> "*" Suivi : suit/est suivi
-User "1" <-- "*" Statistiques : utilise
-Activite "*" --> "1" Sport : appartient à
-Activite "1" <-- "*" Comment : reçoit
-Activite "1" <-- "*" Like : reçoit
-FilActualite "*" --> "*" Activite : contient
-Suivi "*" --> "1" User : suiveur
-Suivi "*" --> "1" User : suivi
