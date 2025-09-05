@@ -7,7 +7,6 @@
 title: APPLICATION SPORTIVE
 ---
 classDiagram
-Activite <|--  Cyclisme
 namespace Main {
  Activite <|--  Cyclisme
     class User{
@@ -41,10 +40,7 @@ namespace Main {
         +ajouter_commentaire(commentaire: Commentaire) void
         +vitesse(fichierGpx) float
     }
-    class Cyclisme{
-    +vitesse_cyclisme() :void
-
-       }        
+         
     class Sport{
         <<enumeration>>
         COURSE_A_PIED
