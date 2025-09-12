@@ -114,9 +114,9 @@ classDiagram
     Suivi "*" --> "1" User : suivi
     
     %% Héritage
-    Sport <|-- Cyclisme
-    Sport <|-- Randonnee
-    Sport <|-- Natation
-    Sport <|-- CourseAPied
+    Activite <|-- Cyclisme
+    Activite <|-- Randonnee
+    Activite <|-- Natation
+    Activite <|-- CourseAPied
 
 ```
