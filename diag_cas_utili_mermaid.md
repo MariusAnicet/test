@@ -38,10 +38,7 @@ graph LR
         TelechargerTraceGPS(Télécharger trace GPS)
         PredictionsDistance(Accéder aux prédictions<br/>de distance)
         
-        %% Administration
-        GererComptes(Gérer les comptes<br/>utilisateurs)
-        ModererContenu(Modérer le contenu)
-        ConsulterStatistiquesGlobales(Consulter statistiques<br/>globales)
+       
     end
 
     %% Relations Utilisateur Non-connecté
@@ -92,7 +89,6 @@ graph LR
 
     %% Application des styles
     class UtilisateurNonConnecte,UtilisateurConnecte actor
-    class Systeme system
     class AppSportive boundary
     class SeConnecter,CreerCompte,CreerActivite,ChargerFichierGPX,ConsulterActivites,ModifierActivite,SupprimerActivite,ConsulterActivitesPubliques,SuivreUtilisateur,ArreterSuivre,LikerActivite,CommenterActivite,ConsulterFilActualite,AppliquerFiltres,ConsulterStatistiques,VisualiserTrace,VisualiserStatistiques,CreerParcours,TelechargerTraceGPS,PredictionsDistance,GererComptes,ModererContenu,ConsulterStatistiquesGlobales usecase
 ```
