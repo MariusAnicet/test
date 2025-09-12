@@ -1,6 +1,4 @@
 @startuml
-@startuml
-
 
 ' Configuration
 left to right direction
@@ -9,7 +7,6 @@ skinparam packageStyle rectangle
 ' Acteurs
 actor "Utilisateur\nNon-connecté" as UtilisateurNonConnecte
 actor "Utilisateur\nConnecté" as UtilisateurConnecte
-actor "Système" as Systeme
 
 ' Frontière du système
 rectangle "Application Sportive" {
