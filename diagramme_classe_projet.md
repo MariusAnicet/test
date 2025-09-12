@@ -82,18 +82,22 @@ classDiagram
     }
 
     class Cyclisme {
+        +list type_velo
         +vitesse() float
     }
 
     class Randonnee {
+        +list type_terrain
         +vitesse() float
     }
 
     class Natation {
+        +type_natation
         +vitesse() float
     }
 
     class CourseAPied {
+        +flot longueur_foulee
         +vitesse() float
     }
 
