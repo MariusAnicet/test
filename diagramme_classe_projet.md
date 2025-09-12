@@ -74,7 +74,6 @@ classDiagram
     }
 
     class Sport {
-        <<enumeration>>
         COURSE_A_PIED
         CYCLISME
         NATATION
@@ -82,17 +81,17 @@ classDiagram
     }
 
     class Cyclisme {
-        +list type_velo
+        +str type_velo
         +vitesse() float
     }
 
     class Randonnee {
-        +list type_terrain
+        +str type_terrain
         +vitesse() float
     }
 
     class Natation {
-        +type_natation
+        + str type_natation
         +vitesse() float
     }
 
