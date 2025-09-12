@@ -98,17 +98,21 @@ classDiagram
     }
 
     %% Relations
-    User ||--o{ Suivi : "suiveur/suivi"
-    User ||--o{ Activite : "crée"
-    User ||--|| Statistiques : "utilise"
-    FilActualite ||--o{ Activite : "contient"
-    Activite ||--o{ Like : "reçoit"
-    Activite ||--o{ Comment : "reçoit"
-    Activite }o--|| Sport : "appartient à"
+    User "1" --> "*" Activite : crée
+    User "1" --> "*" Comment : écrit
+    User "1" --> "*" Like : donne
+    User "1" --> "*" Statistiques : utilise
+    Activite "*" --> "1" Sport : appartient à
+    Activite "1" <-- "*" Comment : reçoit
+    Activite "1" <-- "*" Like : reçoit
+    FilActualite "*" --> "*" Activite : contient
+    Suivi "*" --> "1" User : suiveur
+    Suivi "*" --> "1" User : suivi
     
     %% Héritage
     Sport <|-- Cyclisme
     Sport <|-- Randonnee
     Sport <|-- Natation
     Sport <|-- CourseAPied
+
 ```
