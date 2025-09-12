@@ -1,5 +1,5 @@
 @startuml
-!theme cerulean-outline
+
 
 ' Configuration
 left to right direction
