@@ -1,3 +1,5 @@
+```mermaid
+
 graph LR
     %% Acteurs
     UtilisateurNonConnecte[👤 Utilisateur<br/>Non-connecté]
@@ -98,3 +100,4 @@ graph LR
     class Systeme system
     class AppSportive boundary
     class SeConnecter,CreerCompte,CreerActivite,ChargerFichierGPX,ConsulterActivites,ModifierActivite,SupprimerActivite,ConsulterActivitesPubliques,SuivreUtilisateur,ArreterSuivre,LikerActivite,CommenterActivite,ConsulterFilActualite,AppliquerFiltres,ConsulterStatistiques,VisualiserTrace,VisualiserStatistiques,CreerParcours,TelechargerTraceGPS,PredictionsDistance,GererComptes,ModererContenu,ConsulterStatistiquesGlobales usecase
+```
