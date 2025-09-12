@@ -2,12 +2,11 @@
 
 graph LR
     %% Acteurs
-    UtilisateurNonConnecte[👤 Utilisateur<br/>Non-connecté]
-    UtilisateurConnecte[👤 Utilisateur<br/>Connecté]
-    Systeme[🖥️ Système]
+    UtilisateurNonConnecte[ Utilisateur<br/>Non-connecté]
+    UtilisateurConnecte[ Utilisateur<br/>Connecté]
 
     %% Frontière du système
-    subgraph AppSportive["📱 Application Sportive"]
+    subgraph AppSportive["Application Sportive"]
         
         %% Authentification
         SeConnecter(Se connecter)
@@ -72,10 +71,6 @@ graph LR
     UtilisateurConnecte --> TelechargerTraceGPS
     UtilisateurConnecte --> PredictionsDistance
 
-    %% Relations Système
-    Systeme --> GererComptes
-    Systeme --> ModererContenu
-    Systeme --> ConsulterStatistiquesGlobales
 
     %% Relations d'inclusion (include)
     CreerActivite -.->|include| ChargerFichierGPX
