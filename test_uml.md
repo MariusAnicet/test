@@ -1,3 +1,7 @@
+```mermaid
+---
+title: APPLICATION SPORTIVE
+---
 
 classDiagram
     class User {
@@ -107,3 +111,4 @@ classDiagram
     Sport <|-- Randonnee
     Sport <|-- Natation
     Sport <|-- CourseAPied
+```
