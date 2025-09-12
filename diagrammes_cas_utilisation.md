@@ -1,4 +1,5 @@
 @startuml
+@startuml
 
 
 ' Configuration
@@ -43,11 +44,6 @@ rectangle "Application Sportive" {
   usecase "Télécharger trace GPS" as TelechargerTraceGPS
   usecase "Accéder aux prédictions\nde distance" as PredictionsDistance
   
-  ' Cas d'utilisation - Administration
-  usecase "Gérer les comptes\nutilisateurs" as GererComptes
-  usecase "Modérer le contenu" as ModererContenu
-  usecase "Consulter statistiques\nglobales" as ConsulterStatistiquesGlobales
-}
 
 ' Relations Utilisateur Non-connecté
 UtilisateurNonConnecte --> SeConnecter
@@ -76,10 +72,6 @@ UtilisateurConnecte --> CreerParcours
 UtilisateurConnecte --> TelechargerTraceGPS
 UtilisateurConnecte --> PredictionsDistance
 
-' Relations Système
-Systeme --> GererComptes
-Systeme --> ModererContenu
-Systeme --> ConsulterStatistiquesGlobales
 
 ' Relations d'inclusion (include)
 CreerActivite ..> ChargerFichierGPX : <<include>>
@@ -94,3 +86,4 @@ VisualiserTrace ..> ConsulterActivites : <<extend>>
 UtilisateurConnecte --|> UtilisateurNonConnecte
 
 @enduml
+
