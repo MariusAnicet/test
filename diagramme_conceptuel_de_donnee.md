@@ -1,25 +1,21 @@
 
 ```mermaid
 erDiagram
+    %% Table principale des utilisateurs
     Utilisateur {
         int id_user PK
         string nom_user
         string email_user UK
         string mot_de_passe
-        int age
-        float poids
-        int taille
-        enum niveau
-        text objectifs
-        string photo_profil
-        datetime date_creation
     }
     
+    %% Table des sports (référentiel)
     Sport {
         int id_sport PK
         string nom_sport UK
     }
     
+    %% Table centrale des activités
     Activite {
         int id_activite PK
         string titre
@@ -28,28 +24,11 @@ erDiagram
         int duree
         float distance
         string fichier_gpx
-        float vitesse_moyenne
-        int frequence_cardiaque_moyenne
-        int denivele_positif
-        int calories_brulees
-        string coordonnees_depart
-        string coordonnees_arrivee
-        enum visibilite
         int id_user FK
         int id_sport FK
     }
     
-    Parcours {
-        int id_parcours PK
-        string nom_parcours
-        text description
-        string fichier_gpx_parcours
-        float distance_prevue
-        enum difficulte
-        int id_createur FK
-        datetime date_creation
-    }
-    
+    %% Tables d'interaction sociale
     Commentaire {
         int id_comment PK
         string contenu
@@ -65,12 +44,14 @@ erDiagram
         int id_activite FK
     }
     
+    %% Table de relation utilisateur-utilisateur
     Suivi {
         int id_suiveur PK,FK
         int id_suivi PK,FK
         datetime date_suivi
     }
     
+    %% Table des statistiques
     Statistique {
         int id_statistique PK
         int id_user FK
@@ -79,33 +60,22 @@ erDiagram
         date date_fin
         int nb_activites
         float distance_totale
+        float vit_moy_periode
         int temps_total
-        float vitesse_moyenne_periode
-    }
-    
-    Notification {
-        int id_notification PK
-        int id_destinataire FK
-        enum type_notification
-        text message
-        boolean lu
-        datetime date_creation
-        int id_activite_liee FK
-        int id_user_origine FK
     }
 
-    %% Relations
+    %% Relations principales
     Utilisateur ||--o{ Activite : cree
-    Sport ||--o{ Activite : appartient_a
-    Activite ||--o{ Commentaire : recoit
-    Activite ||--o{ Like : recoit
+    Sport ||--o{ Activite : categorise
+    
+    %% Relations d'interaction
     Utilisateur ||--o{ Commentaire : ecrit
     Utilisateur ||--o{ Like : donne
+    Activite ||--o{ Commentaire : recoit
+    Activite ||--o{ Like : recoit
+    
+    %% Relations de suivi et statistiques
     Utilisateur ||--o{ Suivi : suit
     Utilisateur ||--o{ Suivi : est_suivi
-    Utilisateur ||--o{ Parcours : cree
     Utilisateur ||--o{ Statistique : possede
-    Utilisateur ||--o{ Notification : recoit
-    Utilisateur ||--o{ Notification : origine
-    Activite ||--o{ Notification : concerne
 ```
