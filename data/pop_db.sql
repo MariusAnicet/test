@@ -1,180 +1,169 @@
--- =========================================================
--- pop_db.sql  (PostgreSQL)
--- Données de démonstration pour F1
--- A exécuter APRES init_db.sql
--- =========================================================
+-- =========================================
+-- pop_db.sql — Jeu de données d'exemple F1
+-- Réinitialise puis insère quelques lignes.
+-- À exécuter APRÈS init_db.sql
+-- =========================================
 
 BEGIN;
 
--- Rendez le script idempotent pour les tests
-TRUNCATE TABLE activity_points RESTART IDENTITY CASCADE;
-TRUNCATE TABLE activities RESTART IDENTITY CASCADE;
-TRUNCATE TABLE users RESTART IDENTITY CASCADE;
+-- On vide les tables et on remet les séquences à 1
+TRUNCATE TABLE activite, gpx_file, utilisateur RESTART IDENTITY CASCADE;
 
--- (Ré)assure le référentiel sports (le même que dans init_db.sql)
--- Laisser tel quel : si déjà présent, ON CONFLICT évite le doublon
-INSERT INTO sports (label) VALUES
-  ('course_a_pied'),
-  ('velo'),
-  ('marche'),
-  ('randonnee'),
-  ('natation')
-ON CONFLICT DO NOTHING;
-
--- =========================================
+-- ================
 -- Utilisateurs
--- =========================================
-INSERT INTO users (name, email, password_hash, created_at) VALUES
-  ('Alice Martin', 'alice@example.com', '$2b$12$hashalice', now() - interval '30 days'),
-  ('Bob Dupont',   'bob@example.com',   '$2b$12$hashbob',   now() - interval '25 days'),
-  ('Chloe Leroy',  'chloe@example.com', '$2b$12$hashchloe', now() - interval '20 days'),
-  ('David N''Guyen','david@example.com','$2b$12$hashdavid', now() - interval '10 days');
+-- ================
+INSERT INTO utilisateur (username, email, password_hash)
+VALUES 
+  ('alice',   'alice@example.com',   '$2b$12$alicehashdemonstration...............'),
+  ('bob',     'bob@example.com',     '$2b$12$bobhashdemonstration.................'),
+  ('charlie', 'charlie@example.com', '$2b$12$charliehashdemonstration.............');
 
--- =========================================
--- Activités (exemples réalistes)
--- Remarque: sport_id récupéré par sous-select sur sports.label
---           user_id récupéré par sous-select sur users.email
--- =========================================
-
--- Alice - course à pied, vélo
-INSERT INTO activities
-(user_id, sport_id, title, description, started_at, duration_sec, distance_m,
- elev_gain_m, elev_loss_m, avg_speed_ms, gpx_path, created_at, updated_at)
+-- ================
+-- Fichiers GPX
+-- ================
+-- Ici on choisit le mode "storage_key" pour éviter d'injecter du BYTEA.
+-- Les filenames servent de clé naturelle pour les joindre ensuite.
+INSERT INTO gpx_file (filename, storage_key, sha256, size_bytes)
 VALUES
-(
-  (SELECT id FROM users WHERE email='alice@example.com'),
-  (SELECT id FROM sports WHERE label='course_a_pied'),
-  'Footing matinal au parc', 'Sortie tranquille en endurance fondamentale',
-  (date_trunc('day', now()) - interval '14 days') + time '06:45',
-  45*60, 8200, 60, 60, ROUND(8200.0/(45*60),3),
-  '/data/gpx/alice_footing_park.gpx', now(), now()
-),
-(
-  (SELECT id FROM users WHERE email='alice@example.com'),
-  (SELECT id FROM sports WHERE label='velo'),
-  'Sortie vélo du dimanche', 'Boucle vallonnée',
-  (date_trunc('day', now()) - interval '7 days') + time '09:05',
-  2*3600+15*60, 52500, 420, 420, ROUND(52500.0/(2*3600+15*60),3),
-  '/data/gpx/alice_velo_dimanche.gpx', now(), now()
-),
-(
-  (SELECT id FROM users WHERE email='alice@example.com'),
-  (SELECT id FROM sports WHERE label='course_a_pied'),
-  'Intervalles 6x800m', 'Séance piste',
-  (date_trunc('day', now()) - interval '2 days') + time '18:20',
-  58*60, 11200, 40, 40, ROUND(11200.0/(58*60),3),
-  '/data/gpx/alice_intervalles.gpx', now(), now()
-);
+  ('run-2025-11-01.gpx',      'local://gpx/alice/run-2025-11-01.gpx', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', 123456),
+  ('ride-2025-10-30.gpx',     'local://gpx/bob/ride-2025-10-30.gpx',  'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb', 234567),
+  ('hike-2025-10-20.gpx',     'local://gpx/charlie/hike-2025-10-20.gpx','cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc', 98765),
+  ('swim-2025-11-03.gpx',     'local://gpx/alice/swim-2025-11-03.gpx', 'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd', 45678);
 
--- Bob - marche, randonnée
-INSERT INTO activities
-(user_id, sport_id, title, description, started_at, duration_sec, distance_m,
- elev_gain_m, elev_loss_m, avg_speed_ms, gpx_path, created_at, updated_at)
-VALUES
-(
-  (SELECT id FROM users WHERE email='bob@example.com'),
-  (SELECT id FROM sports WHERE label='marche'),
-  'Marche active', 'Boucle urbaine rapide',
-  (date_trunc('day', now()) - interval '10 days') + time '12:30',
-  50*60, 6100, 30, 30, ROUND(6100.0/(50*60),3),
-  '/data/gpx/bob_marche_active.gpx', now(), now()
-),
-(
-  (SELECT id FROM users WHERE email='bob@example.com'),
-  (SELECT id FROM sports WHERE label='randonnee'),
-  'Rando crêtes', 'Super panorama, sentier technique',
-  (date_trunc('day', now()) - interval '6 days') + time '08:15',
-  4*3600+20*60, 15300, 860, 860, ROUND(15300.0/(4*3600+20*60),3),
-  '/data/gpx/bob_rando_cretes.gpx', now(), now()
-);
+-- =================
+-- Activités (F1)
+-- =================
+-- On calcule avg_speed_mps à l'insertion (distance_m / duration_s).
+-- On fait référence au gpx_file via une sous-requête sur filename.
 
--- Chloé - natation, course à pied
-INSERT INTO activities
-(user_id, sport_id, title, description, started_at, duration_sec, distance_m,
- elev_gain_m, elev_loss_m, avg_speed_ms, gpx_path, created_at, updated_at)
-VALUES
-(
-  (SELECT id FROM users WHERE email='chloe@example.com'),
-  (SELECT id FROM sports WHERE label='natation'),
-  'Séance piscine', '4x400m pull, 8x50m éducatif',
-  (date_trunc('day', now()) - interval '9 days') + time '19:05',
-  55*60, 2500, 0, 0, ROUND(2500.0/(55*60),3),
-  '/data/gpx/chloe_natation.gpx', now(), now()
-),
-(
-  (SELECT id FROM users WHERE email='chloe@example.com'),
-  (SELECT id FROM sports WHERE label='course_a_pied'),
-  'SL 20km', 'Sortie longue en bord de rivière',
-  (date_trunc('day', now()) - interval '1 day') + time '08:40',
-  1*3600+45*60, 20000, 120, 120, ROUND(20000.0/(1*3600+45*60),3),
-  '/data/gpx/chloe_sl_20k.gpx', now(), now()
-);
-
--- David - vélo, course à pied
-INSERT INTO activities
-(user_id, sport_id, title, description, started_at, duration_sec, distance_m,
- elev_gain_m, elev_loss_m, avg_speed_ms, gpx_path, created_at, updated_at)
-VALUES
-(
-  (SELECT id FROM users WHERE email='david@example.com'),
-  (SELECT id FROM sports WHERE label='velo'),
-  'Home-trainer', 'Séance sweet spot',
-  (date_trunc('day', now()) - interval '3 days') + time '07:10',
-  1*3600+10*60, 35000, 0, 0, ROUND(35000.0/(1*3600+10*60),3),
-  '/data/gpx/david_ht.gpx', now(), now()
-),
-(
-  (SELECT id FROM users WHERE email='david@example.com'),
-  (SELECT id FROM sports WHERE label='course_a_pied'),
-  'Jog léger', 'Récupération',
-  (date_trunc('day', now()) - interval '0 days') + time '17:30',
-  35*60, 5600, 20, 20, ROUND(5600.0/(35*60),3),
-  '/data/gpx/david_jog_light.gpx', now(), now()
-);
-
--- =========================================
--- Points de trace (exemples simples, facultatif)
--- Lier à une activité insérée ci-dessus via un SELECT par titre
--- =========================================
-
--- Points pour l’activité "Footing matinal au parc" (Alice)
-WITH a AS (
-  SELECT id AS activity_id
-  FROM activities
-  WHERE title = 'Footing matinal au parc'
-    AND user_id = (SELECT id FROM users WHERE email='alice@example.com')
+-- 1) Course à pied (Alice)
+INSERT INTO activite (
+  user_id, sport, titre, description, start_time,
+  duration_s, distance_m, elevation_gain_m,
+  avg_speed_mps, max_speed_mps, avg_hr, max_hr,
+  calories_kcal, gpx_file_id, privacy
 )
-INSERT INTO activity_points (activity_id, seq, tstamp, lat, lon, elevation_m, dist_cum_m)
-SELECT activity_id, seq, tstamp, lat, lon, elevation_m, dist_cum_m
-FROM (
-  VALUES
-    (1, (date_trunc('day', now()) - interval '14 days') + time '06:45:00', 48.1110, -1.6800, 35.0,   0),
-    (2, (date_trunc('day', now()) - interval '14 days') + time '06:55:00', 48.1125, -1.6780, 35.5, 3000),
-    (3, (date_trunc('day', now()) - interval '14 days') + time '07:05:00', 48.1150, -1.6765, 36.0, 6000),
-    (4, (date_trunc('day', now()) - interval '14 days') + time '07:10:00', 48.1165, -1.6750, 36.5, 8200)
-) AS p(seq, tstamp, lat, lon, elevation_m, dist_cum_m)
-CROSS JOIN a;
+VALUES (
+  (SELECT id FROM utilisateur WHERE username = 'alice'),
+  'running',
+  'Sortie footing Parc',
+  'Footing tranquille au parc',
+  TIMESTAMPTZ '2025-11-01 08:45:00+01',
+  3600,                 -- 1h
+  10000,                -- 10 km
+  120,
+  10000.0/3600.0,       -- avg_speed_mps
+  5.200,                -- max speed (m/s)
+  152, 178,
+  650,
+  (SELECT id FROM gpx_file WHERE filename = 'run-2025-11-01.gpx'),
+  'private'
+);
 
--- Points pour "Rando crêtes" (Bob)
-WITH a AS (
-  SELECT id AS activity_id
-  FROM activities
-  WHERE title = 'Rando crêtes'
-    AND user_id = (SELECT id FROM users WHERE email='bob@example.com')
+-- 2) Cyclisme (Bob)
+INSERT INTO activite (
+  user_id, sport, titre, description, start_time,
+  duration_s, distance_m, elevation_gain_m,
+  avg_speed_mps, max_speed_mps,
+  calories_kcal, gpx_file_id, privacy
 )
-INSERT INTO activity_points (activity_id, seq, tstamp, lat, lon, elevation_m, dist_cum_m)
-SELECT activity_id, seq, tstamp, lat, lon, elevation_m, dist_cum_m
-FROM (
-  VALUES
-    (1, (date_trunc('day', now()) - interval '6 days') + time '08:15:00', 45.0000, 6.0000,  520.0,    0),
-    (2, (date_trunc('day', now()) - interval '6 days') + time '09:45:00', 45.0050, 6.0100,  980.0,  7000),
-    (3, (date_trunc('day', now()) - interval '6 days') + time '11:30:00', 45.0120, 6.0220, 1450.0, 12000),
-    (4, (date_trunc('day', now()) - interval '6 days') + time '12:35:00', 45.0180, 6.0300,  860.0, 15300)
-) AS p(seq, tstamp, lat, lon, elevation_m, dist_cum_m)
-CROSS JOIN a;
+VALUES (
+  (SELECT id FROM utilisateur WHERE username = 'bob'),
+  'cycling',
+  'Sortie vélo vallonnée',
+  'Boucle de 50 km avec dénivelé',
+  TIMESTAMPTZ '2025-10-30 07:30:00+01',
+  7200,                 -- 2h
+  50000,                -- 50 km
+  650,
+  50000.0/7200.0,
+  14.800,
+  1400,
+  (SELECT id FROM gpx_file WHERE filename = 'ride-2025-10-30.gpx'),
+  'friends'
+);
+
+-- 3) Randonnée (Charlie)
+INSERT INTO activite (
+  user_id, sport, titre, description, start_time,
+  duration_s, distance_m, elevation_gain_m,
+  avg_speed_mps, calories_kcal, gpx_file_id, privacy
+)
+VALUES (
+  (SELECT id FROM utilisateur WHERE username = 'charlie'),
+  'hiking',
+  'Rando en forêt',
+  'Boucle familiale',
+  TIMESTAMPTZ '2025-10-20 10:00:00+02',
+  14400,                -- 4h
+  14000,                -- 14 km
+  420,
+  14000.0/14400.0,
+  900,
+  (SELECT id FROM gpx_file WHERE filename = 'hike-2025-10-20.gpx'),
+  'public'
+);
+
+-- 4) Natation (Alice)
+INSERT INTO activite (
+  user_id, sport, titre, description, start_time,
+  duration_s, distance_m, elevation_gain_m,
+  avg_speed_mps, calories_kcal, gpx_file_id, privacy
+)
+VALUES (
+  (SELECT id FROM utilisateur WHERE username = 'alice'),
+  'swimming',
+  'Piscine - endurance',
+  'Séries longues',
+  TIMESTAMPTZ '2025-11-03 19:10:00+01',
+  2700,                 -- 45 min
+  2000,                 -- 2 km
+  0,
+  2000.0/2700.0,
+  350,
+  (SELECT id FROM gpx_file WHERE filename = 'swim-2025-11-03.gpx'),
+  'private'
+);
+
+-- 5) Deuxième sortie course (Bob), sans GPX (ex: saisie manuelle)
+INSERT INTO activite (
+  user_id, sport, titre, start_time,
+  duration_s, distance_m, elevation_gain_m,
+  avg_speed_mps, privacy
+)
+VALUES (
+  (SELECT id FROM utilisateur WHERE username = 'bob'),
+  'running',
+  'Fractionné 8x400m',
+  TIMESTAMPTZ '2025-11-02 18:00:00+01',
+  3000,                 -- 50 min
+  8000,                 -- 8 km
+  60,
+  8000.0/3000.0,
+  'friends'
+);
+
+-- 6) Activité soft-deleted (exemple de suppression logique)
+INSERT INTO activite (
+  user_id, sport, titre, start_time,
+  duration_s, distance_m, elevation_gain_m,
+  avg_speed_mps, privacy, deleted_at
+)
+VALUES (
+  (SELECT id FROM utilisateur WHERE username = 'charlie'),
+  'cycling',
+  'Ancienne sortie à retirer',
+  TIMESTAMPTZ '2025-09-15 09:00:00+02',
+  5400,
+  30000,
+  300,
+  30000.0/5400.0,
+  'private',
+  now() - INTERVAL '1 day'
+);
 
 COMMIT;
 
--- =========================================================
--- Fin du script
--- =========================================================
+-- Vérifications rapides possibles :
+-- SELECT username, count(*) FROM utilisateur u JOIN activite a ON a.user_id=u.id AND a.deleted_at IS NULL GROUP BY 1;
+-- SELECT sport, count(*) FROM activite WHERE deleted_at IS NULL GROUP BY 1;
